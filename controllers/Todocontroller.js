@@ -151,13 +151,13 @@ module.exports.addtask = async (req, res) => {
 };
 
 module.exports.gettodo = async (req, res) => {
-  const id = TokenParser(req,res, "id");
+  const _id = TokenParser(req,res, "id");
 
-  if(id === "Invalid token") {
+  if(_id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
   }
   
-  const todos = await UserSchema.findById(id).populate("todos");
+  const todos = await UserSchema.findById(_id).populate("todos");
   res.json(todos.todos);
 };
 

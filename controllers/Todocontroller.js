@@ -4,6 +4,7 @@ const UserSchema = require("../schema/UserSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret = "TODOAPP";
+const { ObjectId } = require("mongodb");
 
 module.exports.updatetodo = async (req, res) => {
   const { _id, text } = req.body;
@@ -157,9 +158,9 @@ module.exports.gettodo = async (req, res) => {
 
   if (_id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
+
   }
-  const objectId = new mongoose.Types.ObjectId(_id);
-  const user = await UserSchema.findById(objectId);
+  const user = await UserSchema.findById(new ObjectId(_id));
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });

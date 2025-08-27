@@ -13,25 +13,27 @@ module.exports.updatetodo = async (req, res) => {
 };
 module.exports.updatetick = async (req, res) => {
   const { id } = req.body;
-  const data = await Todomodel.findOne({ _id:id });
+  const data = await Todomodel.findOne({ _id: id });
   const check = !data.checked;
   data.checked = check;
   await data.save();
   res.send("Updated");
 };
 module.exports.deletetodo = async (req, res) => {
-    const { _id } = req.body;
+  const { _id } = req.body;
 
-    const userId = TokenParser(req,res, "id");
+  const userId = TokenParser(req, res, "id");
 
-    if(userId === "Invalid token") {
-      res.status(401).json({ error: "Invalid token" });
-    }
-    
-    await Todomodel.findByIdAndDelete(_id).then(async() => 
-      await UserSchema.findByIdAndUpdate(userId, { $pull: { todos: _id } })
-    ).then(() => res.send("Deleted"));
+  if (userId === "Invalid token") {
+    res.status(401).json({ error: "Invalid token" });
+  }
 
+  await Todomodel.findByIdAndDelete(_id)
+    .then(
+      async () =>
+        await UserSchema.findByIdAndUpdate(userId, { $pull: { todos: _id } })
+    )
+    .then(() => res.send("Deleted"));
 };
 
 module.exports.login = async (req, res) => {
@@ -105,9 +107,9 @@ module.exports.register = async (req, res) => {
 
 module.exports.getusernameandpoints = async (req, res) => {
   try {
-    const userId = TokenParser(req,res, "id");
-    
-    if(userId === "Invalid token") {
+    const userId = TokenParser(req, res, "id");
+
+    if (userId === "Invalid token") {
       return res.status(401).json({ error: "Invalid token" });
     }
 
@@ -124,7 +126,7 @@ module.exports.getusernameandpoints = async (req, res) => {
 
 module.exports.addtask = async (req, res) => {
   try {
-    const userId = TokenParser(req,res, "id");
+    const userId = TokenParser(req, res, "id");
     const data = req.body;
 
     const user = await UserSchema.findById(userId);
@@ -143,7 +145,7 @@ module.exports.addtask = async (req, res) => {
       .then(() => {
         user.save();
       });
-    res.json({ message: "Task added successfully" , data});
+    res.json({ message: "Task added successfully", data });
   } catch (error) {
     console.error("Error updating points:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -151,32 +153,44 @@ module.exports.addtask = async (req, res) => {
 };
 
 module.exports.gettodo = async (req, res) => {
-  const _id = TokenParser(req,res, "id");
+  const _id = TokenParser(req, res, "id");
 
-  if(_id === "Invalid token") {
+  if (_id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
   }
-  
-  const todos = await UserSchema.findById(_id).populate("todos");
-  res.json(todos.todos);
+  const objectId = new mongoose.Types.ObjectId(_id);
+  const user = await UserSchema.findById(objectId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const todos = await Todomodel.find({ _id: { $in: user.todos } });
+
+  const tododata = todos.map(todo => ({
+    _id: todo._id,
+    text: todo.text,
+    checked: todo.checked,
+    deadline: todo.deadline
+  }));
+
+  res.json(tododata);
+
 };
 
-const TokenParser = (req,res, need) => {
+const TokenParser = (req, res, need) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ error: "No token provided" });
   }
-  
+
   try {
-      const decoded = jwt.verify(token, secret);
-      if (need === "id") {
-        return decoded.id;
-      } else {
-        return decoded.username;
-      }
-  } catch (err) { 
-    return  "Invalid token" ;
+    const decoded = jwt.verify(token, secret);
+    if (need === "id") {
+      return decoded.id;
+    } else {
+      return decoded.username;
+    }
+  } catch (err) {
+    return "Invalid token";
   }
 };

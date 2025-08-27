@@ -160,7 +160,7 @@ module.exports.gettodo = async (req, res) => {
     return res.status(401).json({ error: "Invalid token" });
 
   }
-  const user = await UserSchema.findById(new ObjectId(_id));
+  const user = await UserSchema.findById(_id);
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });

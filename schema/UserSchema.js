@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
-  todos: [{type : mongoose.Schema.Types.ObjectId, ref: todo}]
+  todos: []
 });
 
 module.exports = mongoose.model("User", userSchema);

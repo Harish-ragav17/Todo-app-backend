@@ -155,12 +155,13 @@ module.exports.addtask = async (req, res) => {
 
 module.exports.gettodo = async (req, res) => {
   const id = TokenParser(req, res, "id");
-
+  
   if (id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
 
   }
-  const user = await UserSchema.findById({_id:id});
+  console.log(typeof id);
+  const user = await UserSchema.findOne({_id:id});
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });
@@ -177,12 +178,12 @@ module.exports.gettodo = async (req, res) => {
 };
 
 const TokenParser = (req, res, need) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
+  const authHeader = req?.headers["authorization"];
+  if(!authHeader){
     return res.status(401).json({ error: "No token provided" });
   }
+
+  const token = authHeader && authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, secret);

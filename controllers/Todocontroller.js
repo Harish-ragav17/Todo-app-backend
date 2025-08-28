@@ -6,6 +6,10 @@ const jwt = require("jsonwebtoken");
 const secret = "TODOAPP";
 const { ObjectId } = require("mongodb");
 
+module.exports.test = async (req, res) => {
+  res.send("API is working");
+};
+
 module.exports.updatetodo = async (req, res) => {
   const { _id, text } = req.body;
   Todomodel.findByIdAndUpdate(_id, { text }).then((data) =>
@@ -60,7 +64,7 @@ module.exports.login = async (req, res) => {
       }
 
       const token = jwt.sign(
-        { id:userser._id.toString(), username: user.username },
+        { id: userser._id.toString(), username: user.username },
         secret,
         { expiresIn: "1h" }
       );
@@ -155,31 +159,31 @@ module.exports.addtask = async (req, res) => {
 
 module.exports.gettodo = async (req, res) => {
   const id = TokenParser(req, res, "id");
-  
+
   if (id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
-
   }
-  const objectId = mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
-  const user = await UserSchema.findOne({_id:objectId});
+  const objectId = mongoose.Types.ObjectId.isValid(id)
+    ? new mongoose.Types.ObjectId(id)
+    : id;
+  const user = await UserSchema.findOne({ _id: objectId });
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });
 
-  const tododata = todos.map(todo => ({
+  const tododata = todos.map((todo) => ({
     _id: todo._id,
     text: todo.text,
     checked: todo.checked,
-    deadline: todo.deadline
+    deadline: todo.deadline,
   }));
 
   res.json(tododata);
-
 };
 
 const TokenParser = (req, res, need) => {
   const authHeader = req?.headers["authorization"];
-  if(!authHeader){
+  if (!authHeader) {
     return res.status(401).json({ error: "No token provided" });
   }
 

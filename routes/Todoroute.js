@@ -9,14 +9,16 @@ const {
   register,
   getusernameandpoints,
   addtask,
+  test,
 } = require("../controllers/Todocontroller");
 const router = Router();
 
-router.get("/", login);
+router.get("/", test);
+router.get("/gettodo", gettodo);
 router.post("/edittext", updatetodo);
 router.post("/updatetick", updatetick);
 router.post("/delete", deletetodo);
-router.post("/login", gettodo );
+router.post("/login", login );
 router.post("/register", register);
 router.get("/getusernameandpoints", getusernameandpoints);
 router.post("/addtask", addtask);

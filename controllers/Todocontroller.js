@@ -154,7 +154,7 @@ module.exports.addtask = async (req, res) => {
 };
 
 module.exports.gettodo = async (req, res) => {
-  const d = TokenParser(req, res, "id");
+  const id = TokenParser(req, res, "id");
 
   if (id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });

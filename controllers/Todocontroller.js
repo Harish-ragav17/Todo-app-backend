@@ -154,13 +154,13 @@ module.exports.addtask = async (req, res) => {
 };
 
 module.exports.gettodo = async (req, res) => {
-  const _id = TokenParser(req, res, "id");
+  const d = TokenParser(req, res, "id");
 
-  if (_id === "Invalid token") {
+  if (id === "Invalid token") {
     return res.status(401).json({ error: "Invalid token" });
 
   }
-  const user = await UserSchema.findById(_id);
+  const user = await UserSchema.findById({_id:id});
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });

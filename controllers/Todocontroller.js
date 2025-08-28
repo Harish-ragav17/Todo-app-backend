@@ -54,13 +54,13 @@ module.exports.login = async (req, res) => {
         });
       }
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log(isMatch);
+
       if (!isMatch) {
         return res.json({ success: false, message: "Incorrect Password..!" });
       }
 
       const token = jwt.sign(
-        { id: user._id, username: user.username },
+        { id:userser._id.toString(), username: user.username },
         secret,
         { expiresIn: "1h" }
       );
@@ -160,8 +160,8 @@ module.exports.gettodo = async (req, res) => {
     return res.status(401).json({ error: "Invalid token" });
 
   }
-  console.log(typeof id);
-  const user = await UserSchema.findOne({_id:id});
+  const objectId = mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id;
+  const user = await UserSchema.findOne({_id:objectId});
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const todos = await Todomodel.find({ _id: { $in: user.todos } });

@@ -11,11 +11,31 @@ module.exports.test = async (req, res) => {
 };
 
 module.exports.updatetodo = async (req, res) => {
-  const { _id, text } = req.body;
-  Todomodel.findByIdAndUpdate(_id, { text }).then((data) =>
-    res.send("Updated")
-  );
+  try {
+    const { _id, text } = req.body;
+
+    if (!_id || !text) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    const updatedTodo = await Todomodel.findByIdAndUpdate(
+      _id,
+      { text },
+      { new: true }
+    );
+
+    if (!updatedTodo) {
+      return res.status(404).json({ success: false, message: "Task not found" });
+    }
+
+    res.json({ success: true, message: "Task updated successfully ✏️", todo: updatedTodo });
+  } catch (error) {
+    console.error("Update failed:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
+
+
 module.exports.updatetick = async (req, res) => {
   const { id } = req.body;
   const data = await Todomodel.findOne({ _id: id });
